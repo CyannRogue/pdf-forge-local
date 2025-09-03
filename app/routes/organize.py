@@ -1,6 +1,8 @@
 from fastapi import APIRouter, UploadFile, File, Form
 from typing import List
-from app.services.organize_service import merge_pdfs, split_pdf, extract_pages, delete_pages
+from app.services.organize_service import (
+    merge_pdfs, split_pdf, extract_pages, delete_pages, reorder_pages
+)
 
 router = APIRouter()
 
@@ -43,4 +45,17 @@ async def delete(file: UploadFile = File(...), ranges: str = Form(...), outfile:
         w.write(await file.read())
     out = f"/tmp/{outfile}"
     delete_pages(p, ranges, out)
+    return {"outfile": out}
+
+@router.post("/reorder")
+async def reorder(file: UploadFile = File(...), order: str = Form(...), outfile: str = Form("reordered.pdf")):
+    """
+    order: comma-separated 1-based page indices representing the new order.
+    Example: "2,3,1,4"
+    """
+    p = f"/tmp/{file.filename}"
+    with open(p, "wb") as w:
+        w.write(await file.read())
+    out = f"/tmp/{outfile}"
+    reorder_pages(p, order, out)
     return {"outfile": out}
