@@ -22,3 +22,8 @@ jobs:
           pip install -r requirements-dev.txt
       - name: Run tests
         run: pytest -q
+      - name: Lint/Format (black --check)
+        run: |
+          pip install black isort
+          black --check .
+          isort --check-only .

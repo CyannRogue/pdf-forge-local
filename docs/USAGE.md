@@ -28,3 +28,10 @@ pip install -r requirements-dev.txt
 pytest -q
 
 ```
+## Env
+- Override temp dir:
+```
+
+export PDF\_FORGE\_TMP=/workspace/tmp
+
+```

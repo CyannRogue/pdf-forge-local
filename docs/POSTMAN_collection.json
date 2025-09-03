@@ -1,0 +1,33 @@
+{
+  "info": {
+    "name": "PDF Forge Local",
+    "_postman_id": "11111111-1111-1111-1111-111111111111",
+    "description": "Local endpoints for PDF Forge",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    { "name": "Health", "request": { "method": "GET", "url": "{{base}}/health" } },
+    { "name": "Merge", "request": { "method": "POST", "url": "{{base}}/organize/merge" } },
+    { "name": "Reorder", "request": { "method": "POST", "url": "{{base}}/organize/reorder" } },
+    { "name": "Delete Pages", "request": { "method": "POST", "url": "{{base}}/organize/delete-pages" } },
+    { "name": "OCR", "request": { "method": "POST", "url": "{{base}}/ocr/searchable" } },
+    { "name": "Watermark", "request": { "method": "POST", "url": "{{base}}/format/watermark" } },
+    { "name": "Page Numbers", "request": { "method": "POST", "url": "{{base}}/format/page-numbers" } },
+    { "name": "Compress", "request": { "method": "POST", "url": "{{base}}/format/compress" } },
+    { "name": "PDF/A", "request": { "method": "POST", "url": "{{base}}/compliance/pdfa" } },
+    { "name": "Linearize", "request": { "method": "POST", "url": "{{base}}/compliance/linearize" } },
+    { "name": "Metadata Get", "request": { "method": "POST", "url": "{{base}}/metadata/get" } },
+    { "name": "Metadata Set", "request": { "method": "POST", "url": "{{base}}/metadata/set" } },
+    { "name": "Bookmarks List", "request": { "method": "POST", "url": "{{base}}/metadata/bookmarks/list" } },
+    { "name": "Bookmarks Add", "request": { "method": "POST", "url": "{{base}}/metadata/bookmarks/add" } },
+    { "name": "Forms List", "request": { "method": "POST", "url": "{{base}}/forms/list" } },
+    { "name": "Forms Fill", "request": { "method": "POST", "url": "{{base}}/forms/fill" } },
+    { "name": "Redact Texts", "request": { "method": "POST", "url": "{{base}}/redact/texts" } },
+    { "name": "Redact Boxes", "request": { "method": "POST", "url": "{{base}}/redact/boxes" } },
+    { "name": "Extract Text", "request": { "method": "POST", "url": "{{base}}/extract/text" } },
+    { "name": "Extract Tables", "request": { "method": "POST", "url": "{{base}}/extract/tables" } },
+    { "name": "Files List", "request": { "method": "GET", "url": "{{base}}/files/list" } },
+    { "name": "Files Download", "request": { "method": "GET", "url": "{{base}}/files/download" } }
+  ],
+  "variable": [{ "key": "base", "value": "http://localhost:8000" }]
+}

@@ -51,5 +51,10 @@ python cli.py merge --out merged.pdf file1.pdf file2.pdf
 * **Extract**: text (pdfminer.six).
 * **Files**: list and download outputs from `/tmp`.
 
+- **Metadata**: get/set doc info, list/add bookmarks.
+- **Forms**: list fields, fill (JSON), optional flatten.
+- **Redact**: text search and box redaction (content removal).
+- **Compliance**: PDF/A conversion (Ghostscript), linearize.
+
 All processing is local. No cloud calls.
 

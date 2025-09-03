@@ -55,3 +55,24 @@ Base URL: `/`
 - `GET /files/download`  
   Query: `name` (basename located in `/tmp`)  
   → binary response
+
+## Metadata
+- `POST /metadata/get` → `{ info: {...} }`
+- `POST /metadata/set` (form fields: title, author, subject, keywords, outfile) → `{ outfile }`
+- `POST /metadata/bookmarks/list` → `{ bookmarks: [{title, page, level}] }`
+- `POST /metadata/bookmarks/add` (text, page, outfile) → `{ outfile }`
+
+## Forms
+- `POST /forms/list` → `{ fields: [{name, type, value}] }`
+- `POST /forms/fill` (data_json as JSON string, flatten bool, outfile) → `{ outfile }`
+
+## Redact
+- `POST /redact/texts` (texts CSV, outfile) → `{ outfile }`
+- `POST /redact/boxes` (boxes_json array, outfile) → `{ outfile }`
+
+## Compliance
+- `POST /compliance/pdfa` (level, outfile) → `{ outfile }`
+- `POST /compliance/linearize` (outfile) → `{ outfile }`
+
+## Extract (tables)
+- `POST /extract/tables` (max_pages, outfile_prefix) → `{ tables: ["/tmp/table_1_1.csv", ...] }`
