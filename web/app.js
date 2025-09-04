@@ -499,3 +499,166 @@ function focusPanelByTool() {
 }
 
 document.addEventListener('DOMContentLoaded', focusPanelByTool);
+
+// Advanced: Extract Tables
+$("#xtBtn").addEventListener('click', async (e) => {
+  setBusy(e.target, true);
+  const f = $("#pdfFile").files[0]; if (!f) { setBusy(e.target, false); return; }
+  const fd = new FormData();
+  fd.append('file', f);
+  fd.append('max_pages', $("#xtMaxPages").value || '25');
+  fd.append('outfile_prefix', $("#xtPrefix").value || 'table');
+  const r = await fetch(api('/extract/tables'), { method: 'POST', body: fd });
+  const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
+  $("#xtOut").textContent = `Tables: ${j.tables.length} files`;
+  await listTmp();
+  setBusy(e.target, false);
+});
+
+// Advanced: Form Automation
+function csvToJsonKV(csv) {
+  const lines = csv.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+  const obj = {};
+  for (const line of lines) {
+    const [k, ...rest] = line.split(',');
+    if (k) obj[k.trim()] = rest.join(',').trim();
+  }
+  return obj;
+}
+
+$("#faListBtn").addEventListener('click', async (e) => {
+  setBusy(e.target, true);
+  const f = $("#pdfFile").files[0]; if (!f) { setBusy(e.target, false); return; }
+  const fd = new FormData(); fd.append('file', f);
+  const r = await fetch(api('/forms/list'), { method: 'POST', body: fd });
+  const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
+  $("#faListOut").textContent = JSON.stringify(j.fields, null, 2);
+  setBusy(e.target, false);
+});
+
+$("#faFillBtn").addEventListener('click', async (e) => {
+  setBusy(e.target, true);
+  const f = $("#pdfFile").files[0]; if (!f) { setBusy(e.target, false); return; }
+  const raw = $("#faData").value || '{}';
+  let data;
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    data = csvToJsonKV(raw);
+  }
+  const fd = new FormData();
+  fd.append('file', f);
+  fd.append('data_json', JSON.stringify(data));
+  fd.append('flatten', $("#faFlatten").checked ? 'true' : 'false');
+  fd.append('outfile', 'auto-filled.pdf');
+  const r = await fetch(api('/forms/fill'), { method: 'POST', body: fd });
+  const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
+  toast('Form filled ✓', 'success');
+  await listTmp();
+  setBusy(e.target, false);
+});
+
+// Advanced: Bookmarks Manager (remove is placeholder)
+$("#bm2ListBtn").addEventListener('click', async (e) => {
+  setBusy(e.target, true);
+  const f = $("#pdfFile").files[0]; if (!f) { setBusy(e.target, false); return; }
+  const fd = new FormData(); fd.append('file', f);
+  const r = await fetch(api('/metadata/bookmarks/list'), { method: 'POST', body: fd });
+  const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
+  $("#bm2ListOut").textContent = JSON.stringify(j.bookmarks, null, 2);
+  setBusy(e.target, false);
+});
+
+$("#bm2AddBtn").addEventListener('click', async (e) => {
+  setBusy(e.target, true);
+  const f = $("#pdfFile").files[0]; if (!f) { setBusy(e.target, false); return; }
+  const fd = new FormData();
+  fd.append('file', f);
+  fd.append('text', $("#bm2Text").value);
+  fd.append('page', $("#bm2Page").value);
+  fd.append('outfile', 'bookmarked.pdf');
+  const r = await fetch(api('/metadata/bookmarks/add'), { method: 'POST', body: fd });
+  const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
+  toast('Bookmark added ✓', 'success');
+  await listTmp();
+  setBusy(e.target, false);
+});
+
+$("#bm2RemoveBtn").addEventListener('click', () => {
+  toast('Remove bookmark is coming soon', 'error');
+});
+
+// AI placeholders
+$("#aiSummBtn").addEventListener('click', () => toast('Summarise is coming soon', 'error'));
+$("#aiTransBtn").addEventListener('click', () => toast('Translate is coming soon', 'error'));
+
+// Accessibility
+$("#accPdfBtn").addEventListener('click', () => toast('Accessible PDF conversion is coming soon', 'error'));
+
+$("#ttsExtractBtn").addEventListener('click', async (e) => {
+  setBusy(e.target, true);
+  const f = $("#pdfFile").files[0]; if (!f) { setBusy(e.target, false); return; }
+  const fd = new FormData(); fd.append('file', f);
+  const r = await fetch(api('/extract/text'), { method: 'POST', body: fd });
+  const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
+  $("#ttsText").value = j.text || '';
+  const u = new SpeechSynthesisUtterance(j.text?.slice(0, 1000) || '');
+  window.speechSynthesis.cancel(); window.speechSynthesis.speak(u);
+  setBusy(e.target, false);
+});
+
+$("#ttsSpeakBtn").addEventListener('click', () => {
+  const t = $("#ttsText").value || '';
+  if (!t) return;
+  const u = new SpeechSynthesisUtterance(t.slice(0, 2000));
+  window.speechSynthesis.cancel(); window.speechSynthesis.speak(u);
+});
+
+$("#ttsStopBtn").addEventListener('click', () => {
+  window.speechSynthesis.cancel();
+});
+
+$("#hcToggleBtn").addEventListener('click', () => {
+  document.documentElement.classList.toggle('high-contrast');
+});
+
+// Workflows (UI only, run is placeholder)
+const wf = { steps: [] };
+function renderWf() {
+  const ul = $("#wfList"); ul.innerHTML = '';
+  wf.steps.forEach((s, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span>${i+1}. ${s.action}</span>`;
+    const ctrl = document.createElement('div'); ctrl.className = 'controls';
+    const up = document.createElement('button'); up.textContent = '↑'; up.onclick = () => { if (i>0) { const t=wf.steps[i-1]; wf.steps[i-1]=wf.steps[i]; wf.steps[i]=t; renderWf(); } };
+    const down = document.createElement('button'); down.textContent = '↓'; down.onclick = () => { if (i<wf.steps.length-1) { const t=wf.steps[i+1]; wf.steps[i+1]=wf.steps[i]; wf.steps[i]=t; renderWf(); } };
+    const del = document.createElement('button'); del.textContent = '✕'; del.onclick = () => { wf.steps.splice(i,1); renderWf(); };
+    ctrl.append(up, down, del); li.appendChild(ctrl); ul.appendChild(li);
+  });
+  $("#wfJsonOut").textContent = JSON.stringify(wf, null, 2);
+}
+$("#wfAddBtn").addEventListener('click', () => {
+  const sel = $("#wfAction");
+  wf.steps.push({ action: sel.value });
+  renderWf();
+});
+$("#wfExportBtn").addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(wf, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'workflow.json'; a.click(); URL.revokeObjectURL(url);
+});
+$("#wfImportBtn").addEventListener('click', () => { $("#wfImportFile").click(); });
+$("#wfImportFile").addEventListener('change', (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader(); reader.onload = () => {
+    try { const obj = JSON.parse(reader.result); if (Array.isArray(obj.steps)) { wf.steps = obj.steps; renderWf(); toast('Workflow imported', 'success'); } }
+    catch { toast('Invalid workflow JSON', 'error'); }
+  }; reader.readAsText(file);
+});
+$("#wfRunBtn").addEventListener('click', () => { toast('Workflow run is coming soon', 'error'); });

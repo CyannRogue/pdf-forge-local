@@ -161,6 +161,108 @@
         </div>
       </div>
     </section>
+
+    <section class="panel" id="panel-advanced">
+      <h2>Advanced</h2>
+      <div class="grid">
+        <div>
+          <h3>Extract Tables</h3>
+          <label>Max pages <input id="xtMaxPages" type="number" min="1" max="500" value="25"></label>
+          <label>Prefix <input id="xtPrefix" value="table"></label>
+          <button id="xtBtn">Extract to CSV</button>
+          <div id="xtOut" class="output"></div>
+        </div>
+        <div>
+          <h3>Form Automation</h3>
+          <button id="faListBtn">List Fields</button>
+          <pre id="faListOut" class="output"></pre>
+          <label>Data (JSON or CSV key,value per line)</label>
+          <textarea id="faData" rows="6" placeholder='{"Field":"Value"}\nname,John'></textarea>
+          <label><input id="faFlatten" type="checkbox" checked> Flatten</label>
+          <button id="faFillBtn">Fill Form</button>
+        </div>
+        <div>
+          <h3>Bookmarks Manager</h3>
+          <button id="bm2ListBtn">List Bookmarks</button>
+          <pre id="bm2ListOut" class="output"></pre>
+          <label>Text <input id="bm2Text"></label>
+          <label>Page <input id="bm2Page" type="number" value="1" min="1"></label>
+          <button id="bm2AddBtn">Add Bookmark</button>
+          <button id="bm2RemoveBtn" disabled>Remove (coming soon)</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-ai">
+      <h2>AI Tools (placeholders)</h2>
+      <div class="grid">
+        <div>
+          <h3>Summarise PDF</h3>
+          <button id="aiSummBtn">Summarise (coming soon)</button>
+        </div>
+        <div>
+          <h3>Translate PDF</h3>
+          <label>Language <input id="aiLang" placeholder="en, es, fr"></label>
+          <button id="aiTransBtn">Translate (coming soon)</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-accessibility">
+      <h2>Accessibility</h2>
+      <div class="grid">
+        <div>
+          <h3>Accessible PDF</h3>
+          <button id="accPdfBtn">Convert (coming soon)</button>
+        </div>
+        <div>
+          <h3>Read Aloud</h3>
+          <button id="ttsExtractBtn">Extract & Read</button>
+          <button id="ttsStopBtn">Stop</button>
+          <textarea id="ttsText" rows="6" placeholder="Text preview for speech..."></textarea>
+          <button id="ttsSpeakBtn">Speak Text</button>
+        </div>
+        <div>
+          <h3>High Contrast</h3>
+          <button id="hcToggleBtn" aria-label="Toggle high-contrast view">Toggle High Contrast</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-workflows">
+      <h2>Workflows</h2>
+      <p class="hint">Chain actions (e.g., Merge → Compress → Watermark) and save as reusable JSON.</p>
+      <div class="grid">
+        <div>
+          <label for="wfAction">Add step</label>
+          <select id="wfAction">
+            <option value="merge">Merge</option>
+            <option value="compress">Compress</option>
+            <option value="watermark">Watermark</option>
+            <option value="page-numbers">Page Numbers</option>
+            <option value="ocr">OCR</option>
+            <option value="extract-tables">Extract Tables</option>
+            <option value="pdfa">PDF/A</option>
+            <option value="linearize">Linearize</option>
+            <option value="redact">Redact</option>
+            <option value="encrypt">Encrypt</option>
+            <option value="decrypt">Decrypt</option>
+          </select>
+          <button id="wfAddBtn">Add Step</button>
+          <ul id="wfList" class="wf-list"></ul>
+          <div class="actions">
+            <button id="wfExportBtn">Export JSON</button>
+            <input id="wfImportFile" type="file" accept="application/json" style="display:none">
+            <button id="wfImportBtn">Import JSON</button>
+            <button id="wfRunBtn" disabled>Run (coming soon)</button>
+          </div>
+        </div>
+        <div>
+          <h3>Workflow JSON</h3>
+          <pre id="wfJsonOut" class="output"></pre>
+        </div>
+      </div>
+    </section>
   </main>
 
   <div id="toasts" class="toasts" aria-live="polite" aria-atomic="true"></div>

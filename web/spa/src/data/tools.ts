@@ -20,6 +20,8 @@ export const CATEGORIES = [
   'Edit',
   'Security',
   'Advanced',
+  'AI Tools',
+  'Accessibility',
   'Apps',
 ]
 
@@ -60,9 +62,18 @@ export const TOOLS: Tool[] = [
   { id: 'redact', title: 'Redact', desc: 'Remove sensitive content', icon: 'Highlighter', categories: ['Security', 'Edit'], launch: { path: '/ui?tool=redact' } },
   { id: 'compare', title: 'Compare', desc: 'Compare two PDFs', icon: 'Diff', categories: ['Security'], enabled: false, launch: { path: '#coming-soon' } },
   // Advanced
-  { id: 'workflows', title: 'Workflows', desc: 'Automate tasks', icon: 'Workflow', categories: ['Advanced'], enabled: false, launch: { path: '#coming-soon' } },
+  { id: 'workflows', title: 'Workflows', desc: 'Chain and save actions', icon: 'Workflow', categories: ['Advanced'], launch: { path: '/ui?tool=workflows' } },
+  { id: 'extract-tables', title: 'Extract Tables', desc: 'Export tables to CSV/Excel', icon: 'Table', categories: ['Advanced'], launch: { path: '/ui?tool=extract-tables' } },
+  { id: 'form-automation', title: 'Form Automation', desc: 'Fill forms from CSV/JSON', icon: 'ClipboardSignature', categories: ['Advanced'], launch: { path: '/ui?tool=form-automation' } },
+  { id: 'bookmarks-manager', title: 'Bookmarks Manager', desc: 'List/add/remove bookmarks', icon: 'Bookmarks', categories: ['Advanced'], launch: { path: '/ui?tool=bookmarks-manager' } },
+  // AI Tools
+  { id: 'summarise', title: 'Summarise PDF', desc: 'AI summary of content', icon: 'FileText', categories: ['AI Tools'], launch: { path: '/ui?tool=summarise' } },
+  { id: 'translate', title: 'Translate PDF', desc: 'AI translate full text', icon: 'Languages', categories: ['AI Tools'], launch: { path: '/ui?tool=translate' } },
+  // Accessibility
+  { id: 'accessible-pdf', title: 'Accessible PDF', desc: 'Convert to accessible PDF', icon: 'Accessibility', categories: ['Accessibility'], launch: { path: '/ui?tool=accessible-pdf' } },
+  { id: 'read-aloud', title: 'Read Aloud', desc: 'Text-to-speech preview', icon: 'Megaphone', categories: ['Accessibility'], launch: { path: '/ui?tool=read-aloud' } },
+  { id: 'high-contrast', title: 'High Contrast', desc: 'Toggle high-contrast theme', icon: 'Contrast', categories: ['Accessibility'], launch: { path: '/ui?tool=high-contrast' } },
   // Apps
   { id: 'desktop', title: 'Desktop App', desc: 'Use on your desktop', icon: 'Monitor', categories: ['Apps'], launch: { path: '/docs/USAGE.md' } },
   { id: 'mobile', title: 'Mobile', desc: 'Mobile workflows', icon: 'Smartphone', categories: ['Apps'], launch: { path: '/docs/USAGE.md' } },
 ]
-
