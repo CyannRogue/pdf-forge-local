@@ -6,3 +6,4 @@
 - **OCR quality poor**: increase DPI in `/convert/pdf-to-images` (e.g., 300) before OCR, or add language packs.
 - **PDF/A conversion fails**: try different level (`PDF/A-1B`), sanitize input (re-save via pikepdf).
 - **Complex PDFs**: try linearize or save via pikepdf to rebuild xref tables.
+- **Rate limited (429)**: High load on OCR or PDF/A. Retry after the delay indicated by the `Retry-After` header and `error.detail.retry_after`.

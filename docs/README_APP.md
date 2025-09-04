@@ -5,7 +5,7 @@ This service exposes a local-only PDF toolkit with a REST API and a minimal web 
 Key facts:
 - Version: 0.3.0
 - All processing is local; no outbound network calls.
-- Static UI at `/ui`. OpenAPI docs at `/docs`.
+- Workbench at `/ui`. Landing (All tools) at `/ui/home/`. OpenAPI docs at `/docs`.
 
 Configuration (env):
 - `PDF_FORGE_TMP` (default `/tmp`) — temp/output directory.
@@ -41,3 +41,7 @@ System dependencies:
 - `tesseract-ocr`, `poppler-utils`, `ghostscript`.
 Missing dependencies return `422` with `code="DEPENDENCY_MISSING"` and `detail.missing`.
 
+UI Navigation:
+- Home: `/ui/home/` — hero, search, category tabs, and tool grid.
+- Workbench: `/ui` — per‑tool panels for organize, convert, OCR, format, metadata, forms, redact, compliance, security.
+- Deep link: `/ui?tool=ID` focuses the matching Workbench section.

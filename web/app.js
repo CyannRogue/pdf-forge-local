@@ -36,6 +36,8 @@ function buildThumb(src, index) {
   div.className = "thumb";
   div.draggable = true;
   div.dataset.index = index;
+  div.tabIndex = 0;
+  div.setAttribute('role', 'option');
   div.innerHTML = `
     <img src="${src}" alt="p${index+1}">
     <label><input type="checkbox" class="sel"> Select</label>
@@ -46,6 +48,28 @@ function buildThumb(src, index) {
     e.dataTransfer.setData("text/plain", index.toString());
   });
   div.addEventListener("dragend", () => div.classList.remove("dragging"));
+  // Keyboard reorder
+  div.addEventListener('keydown', (e) => {
+    const container = $("#thumbs");
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      const siblings = [...container.querySelectorAll('.thumb')];
+      const idx = siblings.indexOf(div);
+      if (e.key === 'ArrowUp' && idx > 0) {
+        container.insertBefore(div, siblings[idx - 1]);
+      }
+      if (e.key === 'ArrowDown' && idx < siblings.length - 1) {
+        container.insertBefore(siblings[idx + 1], div);
+      }
+      // renumber dataset indices
+      [...container.querySelectorAll('.thumb')].forEach((el, i) => el.dataset.index = i);
+    }
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      const cb = div.querySelector('.sel');
+      cb.checked = !cb.checked;
+    }
+  });
   return div;
 }
 
@@ -148,6 +172,19 @@ $("#deleteBtn").addEventListener("click", async (e) => {
   setBusy(e.target, false);
 });
 
+$("#splitBtn").addEventListener("click", async (e) => {
+  setBusy(e.target, true);
+  const f = $("#pdfFile").files[0]; if (!f) return setBusy(e.target, false);
+  const ranges = $("#splitRanges").value || "1";
+  const fd = new FormData(); fd.append('file', f); fd.append('ranges', ranges);
+  const r = await fetch(api('/organize/split'), { method: 'POST', body: fd });
+  const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
+  toast(`Split into ${j.outputs.length} files ✓`, 'success');
+  await listTmp();
+  setBusy(e.target, false);
+});
+
 $("#img2pdfBtn").addEventListener("click", async (e) => {
   setBusy(e.target, true);
   const files = $("#imgFiles").files;
@@ -172,12 +209,27 @@ $("#ocrBtn").addEventListener("click", async (e) => {
   fd.append("file", f);
   fd.append("lang", lang);
   fd.append("outfile", "searchable.pdf");
-  const r = await fetch(api("/ocr/searchable"), { method: "POST", body: fd });
+  const ctrl = new AbortController();
+  const cancelBtn = $("#ocrCancelBtn");
+  cancelBtn.disabled = false;
+  cancelBtn.onclick = () => { ctrl.abort(); };
+  let r;
+  try {
+    r = await fetch(api("/ocr/searchable"), { method: "POST", body: fd, signal: ctrl.signal });
+  } catch (err) {
+    toast('OCR cancelled', 'error');
+    setBusy(e.target, false);
+    cancelBtn.disabled = true;
+    cancelBtn.onclick = null;
+    return;
+  }
   const j = await r.json();
   if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
   $("#ocrOut").textContent = "Searchable PDF: " + j.outfile;
   await listTmp();
   setBusy(e.target, false);
+  cancelBtn.disabled = true;
+  cancelBtn.onclick = null;
 });
 
 $("#wmBtn").addEventListener("click", async (e) => {
@@ -235,3 +287,215 @@ $("#listBtn").addEventListener("click", async (e) => { setBusy(e.target, true); 
 
 // Initial
 listTmp();
+
+// Metadata
+$("#metaGetBtn").addEventListener('click', async (e) => {
+  setBusy(e.target, true);
+  const f = $("#pdfFile").files[0]; if (!f) return setBusy(e.target, false);
+  const fd = new FormData(); fd.append('file', f);
+  const r = await fetch(api('/metadata/get'), { method: 'POST', body: fd });
+  const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
+  $("#metaGetOut").textContent = JSON.stringify(j.info, null, 2);
+  setBusy(e.target, false);
+});
+
+$("#metaSetBtn").addEventListener('click', async (e) => {
+  setBusy(e.target, true);
+  const f = $("#pdfFile").files[0]; if (!f) return setBusy(e.target, false);
+  const fd = new FormData();
+  fd.append('file', f);
+  fd.append('title', $("#metaTitle").value);
+  fd.append('author', $("#metaAuthor").value);
+  fd.append('subject', $("#metaSubject").value);
+  fd.append('keywords', $("#metaKeywords").value);
+  const r = await fetch(api('/metadata/set'), { method: 'POST', body: fd });
+  const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
+  toast('Metadata set ✓', 'success');
+  await listTmp();
+  setBusy(e.target, false);
+});
+
+$("#bmListBtn").addEventListener('click', async (e) => {
+  setBusy(e.target, true);
+  const f = $("#pdfFile").files[0]; if (!f) return setBusy(e.target, false);
+  const fd = new FormData(); fd.append('file', f);
+  const r = await fetch(api('/metadata/bookmarks/list'), { method: 'POST', body: fd });
+  const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
+  $("#bmListOut").textContent = JSON.stringify(j.bookmarks, null, 2);
+  setBusy(e.target, false);
+});
+
+$("#bmAddBtn").addEventListener('click', async (e) => {
+  setBusy(e.target, true);
+  const f = $("#pdfFile").files[0]; if (!f) return setBusy(e.target, false);
+  const fd = new FormData();
+  fd.append('file', f);
+  fd.append('text', $("#bmText").value);
+  fd.append('page', $("#bmPage").value);
+  const r = await fetch(api('/metadata/bookmarks/add'), { method: 'POST', body: fd });
+  const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
+  toast('Bookmark added ✓', 'success');
+  await listTmp();
+  setBusy(e.target, false);
+});
+
+// Forms
+$("#formsListBtn").addEventListener('click', async (e) => {
+  setBusy(e.target, true);
+  const f = $("#pdfFile").files[0]; if (!f) return setBusy(e.target, false);
+  const fd = new FormData(); fd.append('file', f);
+  const r = await fetch(api('/forms/list'), { method: 'POST', body: fd });
+  const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
+  $("#formsListOut").textContent = JSON.stringify(j.fields, null, 2);
+  setBusy(e.target, false);
+});
+
+$("#formsFillBtn").addEventListener('click', async (e) => {
+  setBusy(e.target, true);
+  const f = $("#pdfFile").files[0]; if (!f) return setBusy(e.target, false);
+  const fd = new FormData();
+  fd.append('file', f);
+  fd.append('data_json', $("#formsJson").value);
+  fd.append('flatten', $("#formsFlatten").checked ? 'true' : 'false');
+  const r = await fetch(api('/forms/fill'), { method: 'POST', body: fd });
+  const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
+  toast('Form filled ✓', 'success');
+  await listTmp();
+  setBusy(e.target, false);
+});
+
+// Redact
+$("#redactTextsBtn").addEventListener('click', async (e) => {
+  setBusy(e.target, true);
+  const f = $("#pdfFile").files[0]; if (!f) return setBusy(e.target, false);
+  const fd = new FormData();
+  fd.append('file', f);
+  fd.append('texts', $("#redactTexts").value);
+  const r = await fetch(api('/redact/texts'), { method: 'POST', body: fd });
+  const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
+  toast('Redacted by texts ✓', 'success');
+  await listTmp();
+  setBusy(e.target, false);
+});
+
+$("#redactBoxesBtn").addEventListener('click', async (e) => {
+  setBusy(e.target, true);
+  const f = $("#pdfFile").files[0]; if (!f) return setBusy(e.target, false);
+  const fd = new FormData();
+  fd.append('file', f);
+  fd.append('boxes_json', $("#redactBoxes").value);
+  const r = await fetch(api('/redact/boxes'), { method: 'POST', body: fd });
+  const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
+  toast('Redacted by boxes ✓', 'success');
+  await listTmp();
+  setBusy(e.target, false);
+});
+
+// Compliance
+$("#pdfaBtn").addEventListener('click', async (e) => {
+  setBusy(e.target, true);
+  const f = $("#pdfFile").files[0]; if (!f) return setBusy(e.target, false);
+  const fd = new FormData();
+  fd.append('file', f);
+  fd.append('level', $("#pdfaLevel").value);
+  fd.append('outfile', 'pdfa.pdf');
+  const r = await fetch(api('/compliance/pdfa'), { method: 'POST', body: fd });
+  const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
+  $("#compOut").textContent = 'PDF/A: ' + j.outfile;
+  await listTmp();
+  setBusy(e.target, false);
+});
+
+$("#linearizeBtn").addEventListener('click', async (e) => {
+  setBusy(e.target, true);
+  const f = $("#pdfFile").files[0]; if (!f) return setBusy(e.target, false);
+  const fd = new FormData();
+  fd.append('file', f);
+  fd.append('outfile', 'linearized.pdf');
+  const r = await fetch(api('/compliance/linearize'), { method: 'POST', body: fd });
+  const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
+  $("#compOut").textContent = 'Linearized: ' + j.outfile;
+  await listTmp();
+  setBusy(e.target, false);
+});
+
+// Security
+$("#encryptBtn").addEventListener('click', async (e) => {
+  setBusy(e.target, true);
+  const f = $("#pdfFile").files[0]; if (!f) return setBusy(e.target, false);
+  const fd = new FormData();
+  fd.append('file', f);
+  fd.append('password', $("#secPwd").value);
+  fd.append('outfile', 'locked.pdf');
+  const r = await fetch(api('/secure/encrypt'), { method: 'POST', body: fd });
+  const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
+  toast('Encrypted ✓', 'success');
+  await listTmp();
+  setBusy(e.target, false);
+});
+
+$("#decryptBtn").addEventListener('click', async (e) => {
+  setBusy(e.target, true);
+  const f = $("#pdfFile").files[0]; if (!f) return setBusy(e.target, false);
+  const fd = new FormData();
+  fd.append('file', f);
+  fd.append('password', $("#secPwd2").value);
+  fd.append('outfile', 'unlocked.pdf');
+  const r = await fetch(api('/secure/decrypt'), { method: 'POST', body: fd });
+  const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
+  toast('Decrypted ✓', 'success');
+  await listTmp();
+  setBusy(e.target, false);
+});
+
+// Deep link: /ui?tool=ID → scroll to panel
+function focusPanelByTool() {
+  const params = new URLSearchParams(window.location.search);
+  const tool = (params.get('tool') || '').toLowerCase();
+  if (!tool) return;
+  const map = {
+    // Organize
+    'merge': 'panel-organize', 'split': 'panel-organize', 'remove-pages': 'panel-organize', 'extract-pages': 'panel-organize', 'organize': 'panel-organize',
+    // Convert
+    'images-to-pdf': 'panel-images', 'jpg-to-pdf': 'panel-images',
+    'pdf-to-jpg': 'panel-organize',
+    // OCR
+    'ocr': 'panel-ocr', 'scan-to-pdf': 'panel-ocr',
+    // Format
+    'compress': 'panel-format', 'page-numbers': 'panel-format', 'watermark': 'panel-format',
+    // Security
+    'unlock': 'panel-security', 'protect': 'panel-security',
+    // Metadata
+    'metadata': 'panel-metadata', 'bookmarks': 'panel-metadata',
+    // Forms
+    'forms': 'panel-forms',
+    // Redact
+    'redact': 'panel-redact',
+    // Compliance
+    'pdfa': 'panel-compliance', 'linearize': 'panel-compliance',
+    // Files
+    'files': 'panel-downloads'
+  };
+  const id = map[tool];
+  if (!id) return;
+  const el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const btn = el.querySelector('button');
+    if (btn) btn.focus();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', focusPanelByTool);

@@ -13,7 +13,28 @@
 - Buttons disable while requests are in flight to avoid duplicates.
 - A toast (aria-live) announces success/errors; errors display `message`, `code`, and `request_id`.
 - Basic progress feedback by changing button label to “Working…”.
+ - Keyboard-only reordering: Focus thumbnails and use Up/Down; Space to toggle select.
 
 ## Accessibility
 - Keyboard navigable controls; visible focus states from default browser styles.
 - Toast container uses `aria-live="polite"` so screen readers announce updates.
+
+---
+
+# Landing / Home
+
+- Location: built to `web/home/` and served at `/ui/home/` (hash router). Dev server at `web/spa/`.
+- Stack: React + Tailwind + lucide-react. No backend changes required.
+- Entry: `web/spa/src/pages/Home.tsx`, per‑tool redirect: `web/spa/src/pages/ToolLaunch.tsx`.
+- Tool registry: `web/spa/src/data/tools.ts` exports `Tool`, `CATEGORIES`, and `TOOLS` arrays.
+  - Add a tool by appending to `TOOLS` with an `id`, `title`, `desc`, `icon`, `categories`, and `launch.path` (e.g., `/ui?tool=merge`).
+  - Unknown/coming‑soon tools can be included with `enabled: false` and a `launch.path: '#coming-soon'`.
+- Deep link contract: `/ui?tool=ID` scrolls and focuses corresponding panel in Workbench; `/ui/home/#/tools/ID` redirects to `/ui?tool=ID`.
+
+Dev
+- Install: `cd web/spa && npm i`
+- Run: `npm run dev` (default http://localhost:5173)
+- Build: `npm run build` → outputs to `web/home/`
+
+Accessibility
+- Keyboard operable (tabs, cards, open button). Search labeled; toasts aria-live.

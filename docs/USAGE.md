@@ -10,6 +10,7 @@ Open `/ui` for a simple web interface.
 
 ## API Docs
 Open `/docs`.
+Health: `/health` or `/healthz`  Readiness: `/readyz`.
 
 ## Docker
 ```
@@ -37,6 +38,7 @@ export REQUEST_TIMEOUT_SECS=300
 ```
 # Health
 curl -s http://localhost:8000/health | jq
+curl -s http://localhost:8000/readyz | jq
 
 # Merge
 curl -F files=@a.pdf -F files=@b.pdf -F outfile=merged.pdf http://localhost:8000/organize/merge

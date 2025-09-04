@@ -7,6 +7,8 @@
   },
   "item": [
     { "name": "Health", "request": { "method": "GET", "url": "{{base}}/health" } },
+    { "name": "Healthz", "request": { "method": "GET", "url": "{{base}}/healthz" } },
+    { "name": "Readyz", "request": { "method": "GET", "url": "{{base}}/readyz" } },
     { "name": "Merge", "request": { "method": "POST", "url": "{{base}}/organize/merge" } },
     { "name": "Reorder", "request": { "method": "POST", "url": "{{base}}/organize/reorder" } },
     { "name": "Delete Pages", "request": { "method": "POST", "url": "{{base}}/organize/delete-pages" } },

@@ -5,6 +5,34 @@ Base URL: `/`
 Notes:
 - All success responses include `request_id`.
 - All non-2xx responses use the standard error JSON shape with `code`, `message`, `detail`, `hint`, and `request_id`.
+- `429` responses include `Retry-After` header and `detail.retry_after`.
+
+Examples (selected):
+
+Health
+GET /health → 200
+```
+{ "status": "ok", "request_id": "..." }
+```
+
+Organize Merge
+200
+```
+{ "outfile": "/tmp/merged.pdf", "request_id": "..." }
+```
+415
+```
+{ "error": { "code": "UNSUPPORTED_MEDIA_TYPE", "message": "PDF file required", "detail": {}, "hint": "Use supported file types", "request_id": "..." } }
+```
+
+OCR Searchable
+429
+```
+HTTP/1.1 429 Too Many Requests
+Retry-After: 30
+
+{ "error": { "code": "RATE_LIMITED", "message": "Too many concurrent requests", "detail": {"retry_after": 30}, "hint": "Retry after 30s", "request_id": "..." } }
+```
 
 ## Organize
 - `POST /organize/merge`  
