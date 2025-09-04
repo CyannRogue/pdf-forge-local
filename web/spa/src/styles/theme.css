@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   --bg-gradient-start: #0b1220;
   --bg-gradient-mid: #0e1628;
@@ -19,4 +23,3 @@
 html, body, #root { height: 100%; }
 body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start), var(--bg-gradient-mid), var(--bg-gradient-end)); color: #e5e7eb; }
 .focus-ring:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
-

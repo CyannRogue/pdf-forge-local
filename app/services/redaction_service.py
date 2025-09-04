@@ -1,6 +1,9 @@
 import json
+
 import fitz  # PyMuPDF
+
 from app.errors import bad_request, unprocessable
+
 
 def redact_texts(pdf_in: str, pdf_out: str, needles: list[str]):
     if not needles:
@@ -14,6 +17,7 @@ def redact_texts(pdf_in: str, pdf_out: str, needles: list[str]):
         page.apply_redactions()
     doc.save(pdf_out, deflate=True, garbage=3, clean=True)
     doc.close()
+
 
 def redact_boxes(pdf_in: str, pdf_out: str, boxes_json: str):
     try:

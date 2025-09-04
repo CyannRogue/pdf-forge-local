@@ -1,13 +1,20 @@
-from fastapi import APIRouter, UploadFile, File, Form, Request
-from app.services.secure_service import encrypt_pdf, decrypt_pdf
+from fastapi import APIRouter, File, Form, Request, UploadFile
+
 from app.config import TMP_DIR
-from app.utils import save_upload_stream, sanitize_filename
-from app.errors import ok_json, bad_request
+from app.errors import bad_request, ok_json
+from app.services.secure_service import decrypt_pdf, encrypt_pdf
+from app.utils import sanitize_filename, save_upload_stream
 
 router = APIRouter()
 
+
 @router.post("/encrypt")
-async def encrypt(request: Request, file: UploadFile = File(...), password: str = Form(...), outfile: str = Form("locked.pdf")):
+async def encrypt(
+    request: Request,
+    file: UploadFile = File(...),
+    password: str = Form(...),
+    outfile: str = Form("locked.pdf"),
+):
     if not password:
         raise bad_request("password must be non-empty")
     p = await save_upload_stream(file)
@@ -15,8 +22,14 @@ async def encrypt(request: Request, file: UploadFile = File(...), password: str 
     encrypt_pdf(str(p), str(out), password)
     return ok_json(request, {"outfile": str(out)})
 
+
 @router.post("/decrypt")
-async def decrypt(request: Request, file: UploadFile = File(...), password: str = Form(...), outfile: str = Form("unlocked.pdf")):
+async def decrypt(
+    request: Request,
+    file: UploadFile = File(...),
+    password: str = Form(...),
+    outfile: str = Form("unlocked.pdf"),
+):
     if not password:
         raise bad_request("password must be non-empty")
     p = await save_upload_stream(file)

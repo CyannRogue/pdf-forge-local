@@ -1,17 +1,27 @@
 import io
 from typing import Tuple
-from pypdf import PdfReader, PdfWriter
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import inch
-from reportlab.lib.colors import Color
+
 import pikepdf
+from pypdf import PdfReader, PdfWriter
+from reportlab.lib.colors import Color
+from reportlab.lib.units import inch
+from reportlab.pdfgen import canvas
+
 from app.utils import sanitize_text
 
-def _make_watermark(page_width: float, page_height: float, text: str, opacity: float, angle: float, font_size: int) -> bytes:
+
+def _make_watermark(
+    page_width: float,
+    page_height: float,
+    text: str,
+    opacity: float,
+    angle: float,
+    font_size: int,
+) -> bytes:
     buf = io.BytesIO()
     c = canvas.Canvas(buf, pagesize=(page_width, page_height))
     c.saveState()
-    c.translate(page_width/2, page_height/2)
+    c.translate(page_width / 2, page_height / 2)
     c.rotate(angle)
     # opacity via fill alpha in reportlab: emulate with light color
     alpha = max(0.0, min(opacity, 1.0))
@@ -24,7 +34,15 @@ def _make_watermark(page_width: float, page_height: float, text: str, opacity: f
     c.save()
     return buf.getvalue()
 
-def add_text_watermark(in_pdf: str, out_pdf: str, text: str, opacity: float = 0.15, angle: float = 45.0, font_size: int = 48):
+
+def add_text_watermark(
+    in_pdf: str,
+    out_pdf: str,
+    text: str,
+    opacity: float = 0.15,
+    angle: float = 45.0,
+    font_size: int = 48,
+):
     r = PdfReader(in_pdf)
     w = PdfWriter()
     for page in r.pages:
@@ -37,6 +55,7 @@ def add_text_watermark(in_pdf: str, out_pdf: str, text: str, opacity: float = 0.
         w.add_page(page)
     with open(out_pdf, "wb") as f:
         w.write(f)
+
 
 def _number_position(pw: float, ph: float, position: str) -> Tuple[float, float]:
     margin = 0.5 * inch
@@ -51,7 +70,10 @@ def _number_position(pw: float, ph: float, position: str) -> Tuple[float, float]
     # default: bottom-center
     return (pw / 2, 0.5 * inch)
 
-def add_page_numbers(in_pdf: str, out_pdf: str, position: str = "bottom-right", start: int = 1):
+
+def add_page_numbers(
+    in_pdf: str, out_pdf: str, position: str = "bottom-right", start: int = 1
+):
     r = PdfReader(in_pdf)
     w = PdfWriter()
     num = start
@@ -78,6 +100,7 @@ def add_page_numbers(in_pdf: str, out_pdf: str, position: str = "bottom-right", 
     with open(out_pdf, "wb") as f:
         w.write(f)
 
+
 def compress_pdf(in_pdf: str, out_pdf: str, image_quality: float = 0.6):
     quality = max(0.1, min(image_quality, 1.0))
     with pikepdf.open(in_pdf) as pdf:
@@ -86,5 +109,5 @@ def compress_pdf(in_pdf: str, out_pdf: str, image_quality: float = 0.6):
             linearize=True,
             # optimize_images supported by recent pikepdf; fallbacks are acceptable runtime errors if not supported
             optimize_images=True,
-            image_quality=quality
+            image_quality=quality,
         )

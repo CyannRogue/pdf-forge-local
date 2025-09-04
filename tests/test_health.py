@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+
 from app.main import app
 
 
@@ -16,4 +17,3 @@ def test_health_and_root():
     assert j2.get("version") == "0.3.0"
     assert j2.get("name") == "PDF Forge Local"
     assert "request_id" in j2
-

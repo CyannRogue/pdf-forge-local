@@ -1,7 +1,11 @@
-import img2pdf, os, shutil
+import os
+import shutil
+
+import img2pdf
 from pdf2image import convert_from_path
-from app.errors import dependency_missing
+
 from app.config import TMP_DIR
+from app.errors import dependency_missing
 
 
 def images_to_pdf(image_paths, out_path):

@@ -9,9 +9,8 @@ from typing import Iterable, Optional
 
 from fastapi import UploadFile
 
-from app.config import MAX_UPLOAD_MB, TMP_DIR, REQUEST_TIMEOUT_SECS
-from app.errors import payload_too_large, bad_request
-
+from app.config import MAX_UPLOAD_MB, REQUEST_TIMEOUT_SECS, TMP_DIR
+from app.errors import bad_request, payload_too_large, unsupported_media_type
 
 SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9_.\-]+")
 
@@ -87,3 +86,20 @@ def sanitize_text(text: str, max_len: int = 256) -> str:
     cleaned = "".join(ch for ch in text if 32 <= ord(ch) <= 126)
     return cleaned[:max_len]
 
+
+def ensure_pdf(name: str):
+    if not (name or "").lower().endswith(".pdf"):
+        raise unsupported_media_type("PDF file required")
+
+
+def ensure_image(name: str):
+    if not (name or "").lower().split(".")[-1] in {
+        "png",
+        "jpg",
+        "jpeg",
+        "tif",
+        "tiff",
+        "bmp",
+        "gif",
+    }:
+        raise unsupported_media_type("Image file required")

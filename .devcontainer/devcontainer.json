@@ -4,5 +4,5 @@
   "features": {
     "ghcr.io/devcontainers/features/node:1": {}
   },
-  "postCreateCommand": "pip install -r requirements.txt"
+  "postCreateCommand": "bash scripts/setup.sh && pip install -r requirements-dev.txt"
 }

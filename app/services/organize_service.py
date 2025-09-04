@@ -1,4 +1,5 @@
 from pypdf import PdfReader, PdfWriter
+
 from app.config import TMP_DIR
 
 
@@ -22,6 +23,7 @@ def _parse_ranges(ranges: str, max_page: int):
                 pages.add(i)
     return sorted(pages)
 
+
 def merge_pdfs(paths, out_path):
     writer = PdfWriter()
     for p in paths:
@@ -30,6 +32,7 @@ def merge_pdfs(paths, out_path):
             writer.add_page(page)
     with open(out_path, "wb") as f:
         writer.write(f)
+
 
 def split_pdf(path, ranges):
     r = PdfReader(path)
@@ -49,6 +52,7 @@ def split_pdf(path, ranges):
         outputs.append(out)
     return outputs
 
+
 def extract_pages(path, ranges, out_path):
     r = PdfReader(path)
     pages = _parse_ranges(ranges, len(r.pages))
@@ -60,6 +64,7 @@ def extract_pages(path, ranges, out_path):
     with open(out_path, "wb") as f:
         w.write(f)
 
+
 def delete_pages(path, ranges, out_path):
     r = PdfReader(path)
     remove = set(_parse_ranges(ranges, len(r.pages)))
@@ -69,6 +74,7 @@ def delete_pages(path, ranges, out_path):
             w.add_page(pg)
     with open(out_path, "wb") as f:
         w.write(f)
+
 
 def reorder_pages(path: str, order: list[int], out_path: str):
     r = PdfReader(path)

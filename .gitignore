@@ -2,6 +2,12 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+**/.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+coverage/
+.coverage
 *.db
 *.sqlite3
 .env
@@ -11,6 +17,17 @@ venv/
 ENV/
 .idea/
 .vscode/
+*.log
+.python-version
+.ipynb_checkpoints/
+__pypackages__/
+pip-wheel-metadata/
+# Node / frontend
+**/node_modules/
+web/spa/.vite/
+web/spa/dist/
+# Build outputs and local tmp
+tmp/
 *.pdf
 *.png
 *.jpg
@@ -20,3 +37,4 @@ ENV/
 *.tar
 *.gz
 .DS_Store
+Thumbs.db

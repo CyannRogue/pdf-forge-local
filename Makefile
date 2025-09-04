@@ -1,10 +1,12 @@
-.PHONY: setup run test fmt
+.PHONY: setup run up test fmt
 
 setup:
 	bash scripts/setup.sh
 
 run:
 	uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+up: run
 
 test:
 	pytest -q

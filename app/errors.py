@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uuid
 from typing import Any, Dict, Optional
+
 from fastapi import Request
 
 
@@ -44,42 +45,81 @@ def ok_json(request: Request, payload: Dict[str, Any]) -> Dict[str, Any]:
 
 
 # Convenience constructors for common errors
-def bad_request(message: str, detail: Optional[Dict[str, Any]] = None, hint: str = "Check parameters") -> ServiceError:
+def bad_request(
+    message: str,
+    detail: Optional[Dict[str, Any]] = None,
+    hint: str = "Check parameters",
+) -> ServiceError:
     return ServiceError("BAD_REQUEST", message, 400, detail, hint)
 
 
-def file_not_found(message: str, detail: Optional[Dict[str, Any]] = None) -> ServiceError:
-    return ServiceError("FILE_NOT_FOUND", message, 404, detail, "Ensure file exists in temp dir")
+def file_not_found(
+    message: str, detail: Optional[Dict[str, Any]] = None
+) -> ServiceError:
+    return ServiceError(
+        "FILE_NOT_FOUND", message, 404, detail, "Ensure file exists in temp dir"
+    )
 
 
 def payload_too_large(max_mb: int) -> ServiceError:
-    return ServiceError("PAYLOAD_TOO_LARGE", f"Upload exceeds {max_mb} MB", 413, {"max_mb": max_mb}, "Upload smaller file")
+    return ServiceError(
+        "PAYLOAD_TOO_LARGE",
+        f"Upload exceeds {max_mb} MB",
+        413,
+        {"max_mb": max_mb},
+        "Upload smaller file",
+    )
 
 
 def unsupported_media_type(message: str) -> ServiceError:
-    return ServiceError("UNSUPPORTED_MEDIA_TYPE", message, 415, {}, "Use supported file types")
+    return ServiceError(
+        "UNSUPPORTED_MEDIA_TYPE", message, 415, {}, "Use supported file types"
+    )
 
 
-def unprocessable(message: str, detail: Optional[Dict[str, Any]] = None, hint: str = "Check input validity") -> ServiceError:
+def unprocessable(
+    message: str,
+    detail: Optional[Dict[str, Any]] = None,
+    hint: str = "Check input validity",
+) -> ServiceError:
     return ServiceError("UNPROCESSABLE", message, 422, detail, hint)
 
 
 def wrong_password() -> ServiceError:
-    return ServiceError("WRONG_PASSWORD", "Wrong password", 422, {}, "Use correct password")
+    return ServiceError(
+        "WRONG_PASSWORD", "Wrong password", 422, {}, "Use correct password"
+    )
 
 
 def dependency_missing(missing: list[str]) -> ServiceError:
-    return ServiceError("DEPENDENCY_MISSING", "Required system dependency missing", 422, {"missing": missing}, "Install system packages")
+    return ServiceError(
+        "DEPENDENCY_MISSING",
+        "Required system dependency missing",
+        422,
+        {"missing": missing},
+        "Install system packages",
+    )
 
 
 def rate_limited(retry_after: int = 30) -> ServiceError:
-    return ServiceError("RATE_LIMITED", "Too many concurrent requests", 429, {"retry_after": retry_after}, f"Retry after {retry_after}s")
+    return ServiceError(
+        "RATE_LIMITED",
+        "Too many concurrent requests",
+        429,
+        {"retry_after": retry_after},
+        f"Retry after {retry_after}s",
+    )
 
 
 def timeout() -> ServiceError:
-    return ServiceError("TIMEOUT", "Operation timed out", 504, {}, "Try again with smaller file or higher timeout")
+    return ServiceError(
+        "TIMEOUT",
+        "Operation timed out",
+        504,
+        {},
+        "Try again with smaller file or higher timeout",
+    )
 
 
 def internal_error(message: str = "Unexpected error") -> ServiceError:
     return ServiceError("INTERNAL_ERROR", message, 500, {}, "Try again or check logs")
-

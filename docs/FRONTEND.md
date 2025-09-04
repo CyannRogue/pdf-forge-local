@@ -31,6 +31,10 @@
   - Unknown/coming‑soon tools can be included with `enabled: false` and a `launch.path: '#coming-soon'`.
 - Deep link contract: `/ui?tool=ID` scrolls and focuses corresponding panel in Workbench; `/ui/home/#/tools/ID` redirects to `/ui?tool=ID`.
 
+Categories
+- Added: `AI Tools`, `Accessibility` in `CATEGORIES`.
+- Examples added in registry: Summarise PDF, Translate PDF, Accessible PDF, Read Aloud, High Contrast.
+
 Dev
 - Install: `cd web/spa && npm i`
 - Run: `npm run dev` (default http://localhost:5173)
@@ -38,3 +42,34 @@ Dev
 
 Accessibility
 - Keyboard operable (tabs, cards, open button). Search labeled; toasts aria-live.
+
+---
+
+# Workflows (Workbench)
+
+- Panel ID: `panel-workflows` under `/ui`.
+- Create a workflow: choose an action in the select → Add Step; repeat.
+- Reorder steps: use ↑/↓ on each step item or delete (✕).
+- Save/export: click “Export JSON” to download the config.
+- Import: click “Import JSON” and choose a saved workflow.
+- Run: placeholder for future; will sequentially call backend endpoints (e.g., Merge → Compress → Watermark).
+
+JSON Shape
+```
+{
+  "steps": [
+    { "action": "merge" },
+    { "action": "compress" },
+    { "action": "watermark" }
+  ]
+}
+```
+
+---
+
+# AI/Accessibility Placeholders
+
+- Summarise / Translate: UI buttons log a toast; wire actual integration later (server-side AI or local models).
+- Accessible PDF: UI button placeholder; future integration may use tagging/structure embedding.
+- Read Aloud: Provides a simple text-to-speech preview via browser `speechSynthesis`; “Extract & Read” pulls text via `/extract/text`.
+- High Contrast: toggles a high-contrast theme (CSS class) locally.

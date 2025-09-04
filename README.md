@@ -31,7 +31,9 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
 Codespaces → Ports → make **8000** public → open.
 Interactive API docs: `/docs`  
-Web UI: `/ui`
+Web UI (Workbench): `/ui`  
+Landing (All tools): `/ui/home/`
+Health: `/health` or `/healthz`  Readiness: `/readyz`
 
 ---
 
@@ -86,6 +88,7 @@ docker run --rm -p 8000:8000 -v $(pwd)/tmp:/tmp pdf-forge-local
 
 - `make setup` — install system deps and Python deps
 - `make run` — start server
+- `make up` — alias to run
 - `make test` — run tests
 - `make fmt` — format with black/isort
 

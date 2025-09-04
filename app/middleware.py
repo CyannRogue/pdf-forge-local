@@ -1,11 +1,12 @@
 import time
 import uuid
 from typing import Callable
+
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
-from app.logging_utils import configure_logging
-from app.config import LOG_LEVEL
 
+from app.config import LOG_LEVEL
+from app.logging_utils import configure_logging
 
 logger = configure_logging(LOG_LEVEL)
 
@@ -43,4 +44,3 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
                 exc_info=True,
             )
             raise
-

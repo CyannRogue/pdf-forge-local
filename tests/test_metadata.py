@@ -1,10 +1,13 @@
-from app.services.metadata_service import set_metadata, get_metadata
-from app.services.organize_service import merge_pdfs
 import os
+
+from app.services.metadata_service import get_metadata, set_metadata
+from app.services.organize_service import merge_pdfs
+
 
 def test_set_and_get_metadata(tmp_path):
     # Create a tiny PDF
     from pypdf import PdfWriter
+
     p = tmp_path / "in.pdf"
     w = PdfWriter()
     w.add_blank_page(width=200, height=200)

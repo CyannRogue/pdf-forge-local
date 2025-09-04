@@ -1,23 +1,26 @@
+import asyncio
+import shutil
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from app.routes import (
-    convert, organize, ocr, secure, extract, files, format,
-    metadata, forms, redaction, compliance
-)
-from app.config import ALLOWED_ORIGINS, LOG_LEVEL
+from app.config import ALLOWED_ORIGINS, LOG_LEVEL, TMP_DIR
+from app.errors import ServiceError, error_json, internal_error, ok_json
+from app.errors import timeout as timeout_error
 from app.middleware import RequestContextMiddleware
-import asyncio
-from app.errors import ServiceError, error_json, ok_json, internal_error, timeout as timeout_error
+from app.routes import (compliance, convert, extract, files, format, forms,
+                        metadata, ocr, organize, redaction, secure)
 
 app = FastAPI(title="PDF Forge Local", version="0.3.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[o.strip() for o in ALLOWED_ORIGINS.split(",")] if ALLOWED_ORIGINS else ["*"],
+    allow_origins=(
+        [o.strip() for o in ALLOWED_ORIGINS.split(",")] if ALLOWED_ORIGINS else ["*"]
+    ),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -40,13 +43,23 @@ app.include_router(forms.router, prefix="/forms", tags=["forms"])
 app.include_router(redaction.router, prefix="/redact", tags=["redact"])
 app.include_router(compliance.router, prefix="/compliance", tags=["compliance"])
 
+
 @app.exception_handler(ServiceError)
 async def service_error_handler(request: Request, exc: ServiceError):
-    return JSONResponse(status_code=exc.http_status, content=error_json(request, exc))
+    headers = {}
+    if getattr(exc, "code", "") == "RATE_LIMITED":
+        retry_after = (exc.detail or {}).get("retry_after")
+        if retry_after is not None:
+            headers["Retry-After"] = str(retry_after)
+    return JSONResponse(
+        status_code=exc.http_status, headers=headers, content=error_json(request, exc)
+    )
 
 
 @app.exception_handler(StarletteHTTPException)
-async def starlette_http_exception_handler(request: Request, exc: StarletteHTTPException):
+async def starlette_http_exception_handler(
+    request: Request, exc: StarletteHTTPException
+):
     # Wrap generic HTTPExceptions into standard error shape
     se = ServiceError(
         code="INTERNAL_ERROR" if exc.status_code >= 500 else "BAD_REQUEST",
@@ -75,13 +88,47 @@ async def timeout_handler(request: Request, exc: asyncio.TimeoutError):
     se = timeout_error()
     return JSONResponse(status_code=se.http_status, content=error_json(request, se))
 
+
 # Minimal UI
 app.mount("/ui", StaticFiles(directory="web", html=True), name="ui")
+
 
 @app.get("/health")
 def health(request: Request):
     return ok_json(request, {"status": "ok"})
 
+
 @app.get("/")
 def root(request: Request):
-    return ok_json(request, {"name": "PDF Forge Local", "version": "0.3.0", "status": "ok"})
+    accept = request.headers.get("accept", "")
+    if "text/html" in accept:
+        return RedirectResponse(url="/ui/home/")
+    return ok_json(
+        request, {"name": "PDF Forge Local", "version": "0.3.0", "status": "ok"}
+    )
+
+
+@app.get("/healthz")
+def healthz(request: Request):
+    return ok_json(request, {"status": "ok"})
+
+
+@app.get("/readyz")
+def readyz(request: Request):
+    # Check system deps and disk space
+    deps = {
+        "tesseract": bool(shutil.which("tesseract")),
+        "poppler": bool(shutil.which("pdftoppm") or shutil.which("pdftocairo")),
+        "ghostscript": bool(shutil.which("gs")),
+    }
+    total, used, free = shutil.disk_usage(TMP_DIR)
+    ok = all(deps.values()) and free > 50 * 1024 * 1024
+    return ok_json(
+        request,
+        {
+            "status": "ok" if ok else "degraded",
+            "deps": deps,
+            "disk_free": free,
+            "tmp": str(TMP_DIR),
+        },
+    )

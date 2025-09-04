@@ -1,18 +1,18 @@
 import json
+
 from pypdf import PdfReader, PdfWriter
+
 from app.errors import bad_request
+
 
 def list_fields(pdf_path: str):
     r = PdfReader(pdf_path)
     fields = r.get_fields() or {}
     out = []
     for name, f in fields.items():
-        out.append({
-            "name": name,
-            "type": f.get("/FT"),
-            "value": f.get("/V")
-        })
+        out.append({"name": name, "type": f.get("/FT"), "value": f.get("/V")})
     return out
+
 
 def fill_fields(pdf_in: str, pdf_out: str, data_json: str, flatten: bool = True):
     try:
