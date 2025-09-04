@@ -2,6 +2,10 @@
 
 Base URL: `/`
 
+Notes:
+- All success responses include `request_id`.
+- All non-2xx responses use the standard error JSON shape with `code`, `message`, `detail`, `hint`, and `request_id`.
+
 ## Organize
 - `POST /organize/merge`  
   Form: `outfile` (str), Files: multiple PDFs (`files`)  

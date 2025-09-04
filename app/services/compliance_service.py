@@ -1,9 +1,13 @@
+import shutil
 import subprocess
 import pikepdf
+from app.errors import dependency_missing, unprocessable
 
 def to_pdfa(in_pdf: str, out_pdf: str, level: str = "PDF/A-2B"):
     # Requires Ghostscript
     # Common levels: PDF/A-1B, PDF/A-2B
+    if not shutil.which("gs"):
+        raise dependency_missing(["ghostscript"])
     level_map = {
         "PDF/A-1B": "1",
         "PDF/A-2B": "2",
@@ -17,7 +21,10 @@ def to_pdfa(in_pdf: str, out_pdf: str, level: str = "PDF/A-2B"):
         "-dUseCIEColor",
         in_pdf
     ]
-    subprocess.run(args, check=True)
+    try:
+        subprocess.run(args, check=True, capture_output=True)
+    except subprocess.CalledProcessError as e:
+        raise unprocessable("PDF/A conversion failed", {"returncode": e.returncode})
 
 def linearize_pdf(in_pdf: str, out_pdf: str):
     with pikepdf.open(in_pdf) as pdf:

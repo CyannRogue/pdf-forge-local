@@ -1,4 +1,6 @@
 from pypdf import PdfReader, PdfWriter
+from app.config import TMP_DIR
+
 
 def _parse_ranges(ranges: str, max_page: int):
     pages = set()
@@ -9,6 +11,8 @@ def _parse_ranges(ranges: str, max_page: int):
         if "-" in part:
             a, b = part.split("-")
             a, b = int(a), int(b)
+            if a > b:
+                a, b = b, a
             for i in range(a - 1, b):
                 if 0 <= i < max_page:
                     pages.add(i)
@@ -34,10 +38,12 @@ def split_pdf(path, ranges):
     outputs = []
     for idx, g in enumerate(groups, 1):
         pages = _parse_ranges(g, maxp)
+        if not pages:
+            raise ValueError("No pages selected")
         w = PdfWriter()
         for i in pages:
             w.add_page(r.pages[i])
-        out = f"/tmp/split_{idx}.pdf"
+        out = str(TMP_DIR / f"split_{idx}.pdf")
         with open(out, "wb") as f:
             w.write(f)
         outputs.append(out)
@@ -46,6 +52,8 @@ def split_pdf(path, ranges):
 def extract_pages(path, ranges, out_path):
     r = PdfReader(path)
     pages = _parse_ranges(ranges, len(r.pages))
+    if not pages:
+        raise ValueError("No pages selected")
     w = PdfWriter()
     for i in pages:
         w.add_page(r.pages[i])
@@ -62,19 +70,15 @@ def delete_pages(path, ranges, out_path):
     with open(out_path, "wb") as f:
         w.write(f)
 
-def reorder_pages(path: str, order_csv: str, out_path: str):
+def reorder_pages(path: str, order: list[int], out_path: str):
     r = PdfReader(path)
     maxp = len(r.pages)
-    order = []
-    for token in order_csv.split(","):
-        token = token.strip()
-        if not token:
-            continue
-        idx = int(token) - 1
-        if 0 <= idx < maxp:
-            order.append(idx)
+    if not order:
+        raise ValueError("Order is empty")
+    if any(i < 1 or i > maxp for i in order):
+        raise ValueError("Order contains out of bounds indices")
     w = PdfWriter()
     for i in order:
-        w.add_page(r.pages[i])
+        w.add_page(r.pages[i - 1])
     with open(out_path, "wb") as f:
         w.write(f)

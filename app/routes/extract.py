@@ -1,25 +1,29 @@
-from fastapi import APIRouter, UploadFile, File, Form
+from fastapi import APIRouter, UploadFile, File, Form, Request
 from typing import Optional
 from app.services.extract_service import extract_text_simple, extract_tables
+from app.utils import save_upload_stream, sanitize_filename
+from app.config import TMP_DIR
+from app.errors import ok_json
 
 router = APIRouter()
 
 @router.post("/text")
-async def extract_text(file: UploadFile = File(...)):
-    p = f"/tmp/{file.filename}"
-    with open(p, "wb") as w:
-        w.write(await file.read())
-    txt = extract_text_simple(p)
-    return {"text": txt[:100000]}
+async def extract_text(request: Request, file: UploadFile = File(...)):
+    p = await save_upload_stream(file)
+    txt = extract_text_simple(str(p))
+    truncated = False
+    if len(txt) > 100000:
+        truncated = True
+        txt = txt[:100000]
+    return ok_json(request, {"text": txt, "detail": {"truncated": truncated}})
 
 @router.post("/tables")
 async def tables(
+    request: Request,
     file: UploadFile = File(...),
     max_pages: int = Form(10),
     outfile_prefix: str = Form("table")
 ):
-    p = f"/tmp/{file.filename}"
-    with open(p, "wb") as w:
-        w.write(await file.read())
-    outputs = extract_tables(p, max_pages=max_pages, basename=outfile_prefix)
-    return {"tables": outputs}
+    p = await save_upload_stream(file)
+    outputs = extract_tables(str(p), max_pages=max_pages, basename=outfile_prefix)
+    return ok_json(request, {"tables": outputs})

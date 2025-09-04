@@ -1,5 +1,6 @@
 import json
 from pypdf import PdfReader, PdfWriter
+from app.errors import bad_request
 
 def list_fields(pdf_path: str):
     r = PdfReader(pdf_path)
@@ -14,7 +15,12 @@ def list_fields(pdf_path: str):
     return out
 
 def fill_fields(pdf_in: str, pdf_out: str, data_json: str, flatten: bool = True):
-    data = json.loads(data_json)
+    try:
+        data = json.loads(data_json)
+    except Exception:
+        raise bad_request("data_json must be valid JSON object")
+    if not isinstance(data, dict):
+        raise bad_request("data_json must be a JSON object")
     r = PdfReader(pdf_in)
     w = PdfWriter()
     w.append_pages_from_reader(r)

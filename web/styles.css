@@ -6,6 +6,7 @@ main { padding: 16px; display: grid; grid-template-columns: 1fr; gap: 16px; }
 .panel { background: #161a22; border: 1px solid #2a3142; border-radius: 12px; padding: 16px; }
 button { background: #2d72ff; color: #fff; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer; }
 button:hover { opacity: 0.9; }
+button:disabled { opacity: 0.6; cursor: not-allowed; }
 input, select { padding: 8px; border-radius: 6px; border: 1px solid #2a3142; background: #0f1115; color: #eaeef3; }
 .thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; margin-top: 12px; }
 .thumb { border: 2px dashed #2a3142; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
@@ -19,3 +20,8 @@ ul { list-style: none; padding: 0; margin: 0; }
 li { padding: 6px 4px; border-bottom: 1px solid #2a3142; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 a { color: #a7c4ff; text-decoration: none; }
 a:hover { text-decoration: underline; }
+
+.toasts { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; gap: 8px; z-index: 9999; }
+.toast { padding: 10px 12px; border-radius: 8px; background: #21293a; color: #eaeef3; border: 1px solid #2a3142; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+.toast.success { background: #183a23; border-color: #2e6b3f; }
+.toast.error { background: #3a1b1b; border-color: #6b2e2e; }

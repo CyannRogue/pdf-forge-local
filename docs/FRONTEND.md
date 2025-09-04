@@ -8,3 +8,12 @@
 - OCR via `POST /ocr/searchable`.
 - Watermark / Page numbers / Compress via `/format/*`.
 - Download any output from `/files/download?name=<basename>`.
+
+## UX
+- Buttons disable while requests are in flight to avoid duplicates.
+- A toast (aria-live) announces success/errors; errors display `message`, `code`, and `request_id`.
+- Basic progress feedback by changing button label to “Working…”.
+
+## Accessibility
+- Keyboard navigable controls; visible focus states from default browser styles.
+- Toast container uses `aria-live="polite"` so screen readers announce updates.

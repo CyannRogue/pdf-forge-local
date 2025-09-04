@@ -5,6 +5,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
 from reportlab.lib.colors import Color
 import pikepdf
+from app.utils import sanitize_text
 
 def _make_watermark(page_width: float, page_height: float, text: str, opacity: float, angle: float, font_size: int) -> bytes:
     buf = io.BytesIO()
@@ -29,7 +30,7 @@ def add_text_watermark(in_pdf: str, out_pdf: str, text: str, opacity: float = 0.
     for page in r.pages:
         pw = float(page.mediabox.width)
         ph = float(page.mediabox.height)
-        wm_pdf = _make_watermark(pw, ph, text, opacity, angle, font_size)
+        wm_pdf = _make_watermark(pw, ph, sanitize_text(text), opacity, angle, font_size)
         wm_reader = PdfReader(io.BytesIO(wm_pdf))
         # Merge watermark onto page 0 of wm
         page.merge_page(wm_reader.pages[0])

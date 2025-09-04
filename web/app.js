@@ -1,6 +1,26 @@
 const $ = (sel) => document.querySelector(sel);
 const api = (path) => (window.location.origin + path);
 
+function setBusy(el, busy) {
+  if (!el) return;
+  el.disabled = !!busy;
+  if (busy) {
+    el.dataset._orig = el.textContent;
+    el.textContent = 'Working…';
+  } else if (el.dataset._orig) {
+    el.textContent = el.dataset._orig;
+  }
+}
+
+function toast(msg, type = 'info') {
+  const box = $("#toasts");
+  const div = document.createElement('div');
+  div.className = `toast ${type}`;
+  div.textContent = msg;
+  box.appendChild(div);
+  setTimeout(() => div.remove(), 4000);
+}
+
 let currentPdfFile = null;
 
 async function uploadFile(input) {
@@ -78,20 +98,24 @@ async function pdfToThumbs(file) {
   fd.append("dpi", "120");
   const r = await fetch(api("/convert/pdf-to-images"), { method: "POST", body: fd });
   const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); return; }
   const container = $("#thumbs");
   container.innerHTML = "";
   j.images.forEach((p, i) => container.appendChild(buildThumb(api("/files/download?name=") + encodeURIComponent(p.split("/").pop()), i)));
   enableDrag(container);
 }
 
-$("#thumbBtn").addEventListener("click", async () => {
+$("#thumbBtn").addEventListener("click", async (e) => {
+  setBusy(e.target, true);
   const f = $("#pdfFile").files[0];
   if (!f) return;
   currentPdfFile = f;
-  await pdfToThumbs(f);
+  try { await pdfToThumbs(f); toast('Thumbnails ready'); } catch { /* handled */ }
+  setBusy(e.target, false);
 });
 
-$("#reorderBtn").addEventListener("click", async () => {
+$("#reorderBtn").addEventListener("click", async (e) => {
+  setBusy(e.target, true);
   if (!currentPdfFile) return;
   const order = [...document.querySelectorAll(".thumb")].map(div => parseInt(div.dataset.index, 10) + 1);
   const fd = new FormData();
@@ -100,12 +124,15 @@ $("#reorderBtn").addEventListener("click", async () => {
   fd.append("outfile", "reordered.pdf");
   const r = await fetch(api("/organize/reorder"), { method: "POST", body: fd });
   const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
   $("#fileList").innerHTML = "";
   await listTmp();
-  alert("Reordered → " + j.outfile);
+  toast("Reordered ✓", 'success');
+  setBusy(e.target, false);
 });
 
-$("#deleteBtn").addEventListener("click", async () => {
+$("#deleteBtn").addEventListener("click", async (e) => {
+  setBusy(e.target, true);
   if (!currentPdfFile) return;
   const indices = [...document.querySelectorAll(".thumb")].map((div, i) => [i, div.querySelector(".sel").checked]).filter(([i, sel]) => sel).map(([i]) => i + 1);
   if (indices.length === 0) return;
@@ -115,11 +142,14 @@ $("#deleteBtn").addEventListener("click", async () => {
   fd.append("outfile", "pruned.pdf");
   const r = await fetch(api("/organize/delete-pages"), { method: "POST", body: fd });
   const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
   await listTmp();
-  alert("Pruned → " + j.outfile);
+  toast("Pruned ✓", 'success');
+  setBusy(e.target, false);
 });
 
-$("#img2pdfBtn").addEventListener("click", async () => {
+$("#img2pdfBtn").addEventListener("click", async (e) => {
+  setBusy(e.target, true);
   const files = $("#imgFiles").files;
   if (!files.length) return;
   const fd = new FormData();
@@ -127,11 +157,14 @@ $("#img2pdfBtn").addEventListener("click", async () => {
   fd.append("outfile", "images.pdf");
   const r = await fetch(api("/convert/images-to-pdf"), { method: "POST", body: fd });
   const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
   $("#img2pdfOut").textContent = "Created: " + j.outfile;
   await listTmp();
+  setBusy(e.target, false);
 });
 
-$("#ocrBtn").addEventListener("click", async () => {
+$("#ocrBtn").addEventListener("click", async (e) => {
+  setBusy(e.target, true);
   const f = $("#pdfFile").files[0];
   if (!f) return;
   const lang = $("#ocrLang").value || "eng";
@@ -141,11 +174,14 @@ $("#ocrBtn").addEventListener("click", async () => {
   fd.append("outfile", "searchable.pdf");
   const r = await fetch(api("/ocr/searchable"), { method: "POST", body: fd });
   const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
   $("#ocrOut").textContent = "Searchable PDF: " + j.outfile;
   await listTmp();
+  setBusy(e.target, false);
 });
 
-$("#wmBtn").addEventListener("click", async () => {
+$("#wmBtn").addEventListener("click", async (e) => {
+  setBusy(e.target, true);
   const f = $("#pdfFile").files[0];
   if (!f) return;
   const text = $("#wmText").value || "CONFIDENTIAL";
@@ -155,11 +191,14 @@ $("#wmBtn").addEventListener("click", async () => {
   fd.append("outfile", "watermarked.pdf");
   const r = await fetch(api("/format/watermark"), { method: "POST", body: fd });
   const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
   $("#fmtOut").textContent = "Watermarked: " + j.outfile;
   await listTmp();
+  setBusy(e.target, false);
 });
 
-$("#numBtn").addEventListener("click", async () => {
+$("#numBtn").addEventListener("click", async (e) => {
+  setBusy(e.target, true);
   const f = $("#pdfFile").files[0];
   if (!f) return;
   const pos = $("#numPos").value;
@@ -169,11 +208,14 @@ $("#numBtn").addEventListener("click", async () => {
   fd.append("outfile", "numbered.pdf");
   const r = await fetch(api("/format/page-numbers"), { method: "POST", body: fd });
   const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
   $("#fmtOut").textContent = "Numbered: " + j.outfile;
   await listTmp();
+  setBusy(e.target, false);
 });
 
-$("#cmpBtn").addEventListener("click", async () => {
+$("#cmpBtn").addEventListener("click", async (e) => {
+  setBusy(e.target, true);
   const f = $("#pdfFile").files[0];
   if (!f) return;
   const q = $("#cmpQ").value || "0.6";
@@ -183,11 +225,13 @@ $("#cmpBtn").addEventListener("click", async () => {
   fd.append("outfile", "compressed.pdf");
   const r = await fetch(api("/format/compress"), { method: "POST", body: fd });
   const j = await r.json();
+  if (!r.ok) { toast(`${j.error.message} (${j.error.code}) [${j.error.request_id}]`, 'error'); setBusy(e.target, false); return; }
   $("#fmtOut").textContent = "Compressed: " + j.outfile;
   await listTmp();
+  setBusy(e.target, false);
 });
 
-$("#listBtn").addEventListener("click", listTmp);
+$("#listBtn").addEventListener("click", async (e) => { setBusy(e.target, true); await listTmp(); setBusy(e.target, false); });
 
 // Initial
 listTmp();

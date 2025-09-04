@@ -6,3 +6,5 @@
 - Redaction uses PyMuPDF `add_redact_annot` + `apply_redactions()` + `save(clean=True, garbage=3)` to remove underlying content.
 - PDF/A conversion uses Ghostscript; verify outputs if compliance is critical.
 - Consider running in a container with a bind-mounted temp dir for isolation.
+- Filenames are sanitized to basenames and restricted to `[A-Za-z0-9_.-]` characters; outputs are always written inside `PDF_FORGE_TMP`.
+- Standardized error responses include `request_id` for incident correlation.

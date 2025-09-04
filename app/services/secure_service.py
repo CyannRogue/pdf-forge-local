@@ -1,4 +1,5 @@
 from pypdf import PdfReader, PdfWriter
+from app.errors import wrong_password
 
 
 def encrypt_pdf(in_pdf, out_pdf, password):
@@ -17,9 +18,9 @@ def decrypt_pdf(in_pdf, out_pdf, password):
         try:
             ok = r.decrypt(password)
             if not ok:
-                raise ValueError("Wrong password")
+                raise wrong_password()
         except Exception as e:
-            raise ValueError("Wrong password") from e
+            raise wrong_password() from e
     w = PdfWriter()
     for p in r.pages:
         w.add_page(p)
