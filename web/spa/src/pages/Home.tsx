@@ -39,13 +39,13 @@ export default function Home() {
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-8">
-        <section className="mb-8">
-          <h1 className="text-3xl font-bold">All PDF tools in one place</h1>
-          <p className="text-slate-300 mt-2">Organize, convert, compress, secure, and edit your PDFs locally.</p>
+        <section className="mb-8 text-center">
+          <h1 className="text-4xl md:text-5xl font-extrabold">Every tool you need to work with PDFs in one place</h1>
+          <p className="text-slate-300 mt-3 max-w-3xl mx-auto">Merge, split, compress, convert, unlock and watermark PDFs with just a few clicks — all locally.</p>
           <div className="mt-4">
             <label htmlFor="search" className="sr-only">Search tools</label>
             <input id="search" value={q} onChange={(e) => { setQ(e.target.value); track('search', { q: e.target.value }) }}
-              placeholder="Search tools..." className="w-full max-w-xl px-3 py-2 rounded-md bg-[#0f1115] border border-[#2a3142] focus-ring" />
+              placeholder="Search tools..." className="w-full max-w-xl mx-auto px-4 py-3 rounded-full bg-[#0f1115] border border-[#2a3142] focus-ring" />
           </div>
         </section>
 
@@ -53,19 +53,19 @@ export default function Home() {
           <CategoryTabs categories={CATEGORIES} active={cat} onChange={(c) => { setCat(c); track('filter_category', { c }) }} />
         </section>
 
-        <section className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <section className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
           {filtered.map((t) => (
             <ToolCard key={t.id} tool={t} onOpen={onOpen} />
           ))}
         </section>
 
         <section className="mt-12 grid gap-4 grid-cols-1 md:grid-cols-2">
-          <div className="rounded-xl p-6 bg-[#161a22] border border-[#2a3142]">
+          <div className="rounded-2xl p-6 bg-[#161a22] border border-[#2a3142]">
             <h3 className="text-lg font-semibold">Desktop</h3>
             <p className="text-sm text-slate-300 mt-1">Run everything locally with Docker or your workstation Python.</p>
             <a className="inline-block mt-3 px-3 py-2 rounded-md bg-[var(--accent)] text-[var(--accent-fg)]" href="/docs/USAGE.md">Get started</a>
           </div>
-          <div className="rounded-xl p-6 bg-[#161a22] border border-[#2a3142]">
+          <div className="rounded-2xl p-6 bg-[#161a22] border border-[#2a3142]">
             <h3 className="text-lg font-semibold">Mobile</h3>
             <p className="text-sm text-slate-300 mt-1">Use the lightweight Workbench from your phone’s browser.</p>
             <a className="inline-block mt-3 px-3 py-2 rounded-md bg-[var(--accent)] text-[var(--accent-fg)]" href="/ui">Open Workbench</a>
@@ -108,4 +108,3 @@ export default function Home() {
     </div>
   )
 }
-
