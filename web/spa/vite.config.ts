@@ -2,14 +2,13 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 
-// Output built landing into ../home so FastAPI serves /ui/home/
+// Build the new SPA to web/site and serve at '/'
 export default defineConfig({
   plugins: [react()],
   root: '.',
-  base: '/ui/home/',
+  base: '/',
   build: {
-    outDir: resolve(__dirname, '../home'),
+    outDir: resolve(__dirname, '../site'),
     emptyOutDir: true
   }
 })
-

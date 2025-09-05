@@ -22,7 +22,7 @@ See `docs/ARCHITECTURE.md`.
 Offline-by-default; temp outputs in `/tmp` or `PDF_FORGE_TMP`; minimal logging; explicit routes per operation.
 
 ## Tooling
-Dockerfile, CI (pytest), Makefile targets, Postman collection, minimal web UI at `/ui`.
+Dockerfile, CI (pytest), Makefile targets, Postman collection, SPA Home at `/ui/home/` with per‑tool pages.
 
 ## Risks & Notes
 - OCR depends on language packs for quality.

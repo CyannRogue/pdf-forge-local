@@ -42,6 +42,33 @@ const SPECS: Record<string, Spec> = {
     ],
     parseSuccess: (j) => (<ResultList title="Outputs" files={j.outputs} />)
   },
+  'remove-pages': {
+    endpoint: '/organize/delete-pages',
+    fields: [
+      { kind: 'file', name: 'file', label: 'PDF file', accept: 'application/pdf' },
+      { kind: 'text', name: 'ranges', label: 'Pages to delete (CSV or ranges)', placeholder: '1,3,5 or 2-4' },
+      { kind: 'text', name: 'outfile', label: 'Output name', defaultValue: 'pruned.pdf' },
+    ],
+    parseSuccess: (j) => (<ResultFile name={j.outfile} />)
+  },
+  'extract-pages': {
+    endpoint: '/organize/extract-pages',
+    fields: [
+      { kind: 'file', name: 'file', label: 'PDF file', accept: 'application/pdf' },
+      { kind: 'text', name: 'ranges', label: 'Pages to extract (CSV or ranges)', placeholder: '1-3; 5' },
+      { kind: 'text', name: 'outfile', label: 'Output name', defaultValue: 'extract.pdf' },
+    ],
+    parseSuccess: (j) => (<ResultFile name={j.outfile} />)
+  },
+  'organize': {
+    endpoint: '/organize/reorder',
+    fields: [
+      { kind: 'file', name: 'file', label: 'PDF file', accept: 'application/pdf' },
+      { kind: 'text', name: 'order', label: 'New order (CSV of page numbers)', placeholder: '2,3,1,4' },
+      { kind: 'text', name: 'outfile', label: 'Output name', defaultValue: 'reordered.pdf' },
+    ],
+    parseSuccess: (j) => (<ResultFile name={j.outfile} />)
+  },
   'compress': {
     endpoint: '/format/compress',
     fields: [
@@ -259,9 +286,6 @@ export default function ToolLaunch() {
 
       <div className="mt-6 flex items-center gap-3 text-sm">
         <Link className="text-slate-300 underline focus-ring" to="/">Back to Home</Link>
-        {!spec && (
-          <a className="px-3 py-2 rounded-md bg-[var(--accent)] text-[var(--accent-fg)]" href={`/ui?tool=${encodeURIComponent(tool.id)}`}>Open in Workbench</a>
-        )}
       </div>
 
       {spec ? (
@@ -324,8 +348,7 @@ export default function ToolLaunch() {
         </form>
       ) : (
         <div className="mt-8 rounded-2xl p-6 bg-[#161a22] border border-[#2a3142]">
-          <p className="text-slate-300">This tool opens in the Workbench UI.</p>
-          <a className="inline-block mt-3 px-4 py-2 rounded-md bg-[var(--accent)] text-[var(--accent-fg)]" href={`/ui?tool=${encodeURIComponent(tool.id)}`}>Open Workbench</a>
+          <p className="text-slate-300">This tool is not yet available in the inline runner. Coming soon.</p>
         </div>
       )}
     </div>

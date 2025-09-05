@@ -10,4 +10,4 @@
   - reportlab: overlays (watermark, numbers).
   - system: Ghostscript (PDF/A), Poppler (pdf2image), Tesseract (OCR).
 - **Storage**: temp outputs in `/tmp` (override with env `PDF_FORGE_TMP`).
-- **UI**: static assets served at `/ui`.
+- **UI**: SPA served at `/ui/home/` (with per‑tool pages under `#/tools/<id>`). Legacy `/ui` redirects to the SPA.

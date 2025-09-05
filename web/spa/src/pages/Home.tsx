@@ -31,7 +31,6 @@ export default function Home() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="font-semibold">PDF Forge</div>
           <nav className="text-sm flex items-center gap-4 text-slate-300">
-            <a className="focus-ring" href="/ui">Workbench</a>
             <a className="focus-ring" href="/docs">Docs</a>
             <a className="focus-ring" href="/docs/USAGE.md">Usage</a>
           </nav>
@@ -67,8 +66,8 @@ export default function Home() {
           </div>
           <div className="rounded-2xl p-6 bg-[#161a22] border border-[#2a3142]">
             <h3 className="text-lg font-semibold">Mobile</h3>
-            <p className="text-sm text-slate-300 mt-1">Use the lightweight Workbench from your phone’s browser.</p>
-            <a className="inline-block mt-3 px-3 py-2 rounded-md bg-[var(--accent)] text-[var(--accent-fg)]" href="/ui">Open Workbench</a>
+            <p className="text-sm text-slate-300 mt-1">Use the Home UI from your phone’s browser.</p>
+            <a className="inline-block mt-3 px-3 py-2 rounded-md bg-[var(--accent)] text-[var(--accent-fg)]" href="/ui/home/">Open Home</a>
           </div>
         </section>
       </main>
@@ -78,7 +77,6 @@ export default function Home() {
           <div>
             <div className="font-semibold text-white">Product</div>
             <ul className="mt-2 space-y-1">
-              <li><a className="focus-ring" href="/ui">Workbench</a></li>
               <li><a className="focus-ring" href="/ui/home/">Home</a></li>
             </ul>
           </div>

@@ -13,3 +13,14 @@ test:
 
 fmt:
 	python -m pip install black isort && black . && isort .
+
+.PHONY: ui-dev ui-build ui-watch
+
+ui-dev:
+	cd web/spa && npm i && npm run dev
+
+ui-build:
+	cd web/spa && npm i && npm run build
+
+ui-watch:
+	cd web/spa && npm i && npm run build:watch

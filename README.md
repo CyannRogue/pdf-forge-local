@@ -30,10 +30,11 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 Codespaces → Ports → make **8000** public → open.
-Interactive API docs: `/docs`  
-Web UI (Workbench): `/ui`  
-Landing (All tools): `/ui/home/`
-Health: `/health` or `/healthz`  Readiness: `/readyz`
+
+- New UI: `/` (Launcher), `/organizer`, `/editor/upload`
+- Legacy UI: `/ui` (kept for deep links)
+- Interactive API docs: `/docs`
+- Health: `/health` or `/healthz`  Readiness: `/readyz`
 
 ---
 
@@ -91,4 +92,6 @@ docker run --rm -p 8000:8000 -v $(pwd)/tmp:/tmp pdf-forge-local
 - `make up` — alias to run
 - `make test` — run tests
 - `make fmt` — format with black/isort
+
+Note: The new visual, button‑driven SPA is served at root routes; the legacy Workbench remains available at `/ui`.
 

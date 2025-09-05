@@ -1,11 +1,11 @@
 # PDF Forge Local — App Guide
 
-This service exposes a local-only PDF toolkit with a REST API and a minimal web UI.
+This service exposes a local-only PDF toolkit with a REST API and a visual, button‑driven single-page web UI.
 
 Key facts:
 - Version: 0.3.0
 - All processing is local; no outbound network calls.
-- Workbench at `/ui`. Landing (All tools) at `/ui/home/`. OpenAPI docs at `/docs`.
+- Feature Launcher: `/`. Organizer: `/organizer`. Editor: `/editor/upload` → `/editor/workspace`. Legacy Workbench at `/ui`. OpenAPI docs at `/docs`.
 
 Configuration (env):
 - `PDF_FORGE_TMP` (default `/tmp`) — temp/output directory.
@@ -42,6 +42,10 @@ System dependencies:
 Missing dependencies return `422` with `code="DEPENDENCY_MISSING"` and `detail.missing`.
 
 UI Navigation:
-- Home: `/ui/home/` — hero, search, category tabs, and tool grid.
-- Workbench: `/ui` — per‑tool panels for organize, convert, OCR, format, metadata, forms, redact, compliance, security.
-- Deep link: `/ui?tool=ID` focuses the matching Workbench section.
+- `/` — Launcher with feature cards (Merge, Organize, Split, Compress, OCR, Convert, Protect/Unlock, Redact, Edit, Workflows).
+- `/organizer` — Drag to reorder pages, delete, split points, compress preset buttons, OCR toggle; downloads appear after actions.
+- `/editor/upload` → `/editor/workspace` — Upload then annotate (example rectangles) and Save.
+- `/ui` — legacy Workbench still available.
+
+Screenshots (suggested)
+- Launcher grid, Organizer page grid with thumbnails and buttons, Editor workspace with toolbar.

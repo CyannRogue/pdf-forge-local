@@ -6,7 +6,8 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 ## UI
-Open `/ui` for a simple web interface.
+- Home: open `/ui/home/`.
+- Individual tools: `/ui/home/#/tools/<tool-id>` (e.g., `/ui/home/#/tools/split`).
 
 ## API Docs
 Open `/docs`.

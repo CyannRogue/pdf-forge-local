@@ -3,7 +3,7 @@ import shutil
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
@@ -92,6 +92,12 @@ async def timeout_handler(request: Request, exc: asyncio.TimeoutError):
 # Minimal UI
 app.mount("/ui", StaticFiles(directory="web", html=True), name="ui")
 
+# Serve new SPA built to web/site at root routes. Assets under /assets.
+app.mount("/assets", StaticFiles(directory="web/site/assets", html=False), name="assets")
+
+def _spa_index():
+    return FileResponse("web/site/index.html")
+
 
 @app.get("/health")
 def health(request: Request):
@@ -102,10 +108,23 @@ def health(request: Request):
 def root(request: Request):
     accept = request.headers.get("accept", "")
     if "text/html" in accept:
-        return RedirectResponse(url="/ui/home/")
-    return ok_json(
-        request, {"name": "PDF Forge Local", "version": "0.3.0", "status": "ok"}
-    )
+        return _spa_index()
+    return ok_json(request, {"name": "PDF Forge Local", "version": "0.3.0", "status": "ok"})
+
+
+@app.get("/organizer")
+def organizer():
+    return _spa_index()
+
+
+@app.get("/editor/upload")
+def editor_upload():
+    return _spa_index()
+
+
+@app.get("/editor/workspace")
+def editor_workspace():
+    return _spa_index()
 
 
 @app.get("/healthz")

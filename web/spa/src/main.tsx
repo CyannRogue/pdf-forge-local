@@ -1,21 +1,24 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import { HashRouter, Route, Routes } from 'react-router-dom'
-import Home from './pages/Home'
-import ToolLaunch from './pages/ToolLaunch'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import './styles/theme.css'
+import Launcher from './pages/Launcher'
+import Organizer from './pages/Organizer'
+import EditorUpload from './pages/EditorUpload'
+import EditorWorkspace from './pages/EditorWorkspace'
 
 function App() {
   return (
-    <HashRouter>
+    <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/tools/:id" element={<ToolLaunch />} />
+        <Route path="/" element={<Launcher />} />
+        <Route path="/organizer" element={<Organizer />} />
+        <Route path="/editor/upload" element={<EditorUpload />} />
+        <Route path="/editor/workspace" element={<EditorWorkspace />} />
       </Routes>
-    </HashRouter>
+    </BrowserRouter>
   )
 }
 
 const root = createRoot(document.getElementById('root')!)
 root.render(<React.StrictMode><App /></React.StrictMode>)
-
