@@ -155,18 +155,21 @@ export default function Organizer() {
 
   // drag reorder
   function enableDrag(container: HTMLElement) {
-    container.addEventListener('dragover', (e) => {
+    const grid = (container.querySelector('.page-grid') as HTMLElement) || container
+    const onDragOver = (e: DragEvent) => {
       e.preventDefault()
-      const dragging = container.querySelector('.dragging') as HTMLElement
+      try { (e.dataTransfer as any).dropEffect = 'move' } catch {}
+      const dragging = grid.querySelector('.dragging') as HTMLElement | null
       if (!dragging) return
-      const el = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null
-      const target = el?.closest?.('.draggable') as HTMLElement | null
+      const el = (e.target as HTMLElement)
+      const target = el.closest?.('.draggable') as HTMLElement | null
       if (!target || target === dragging) return
-      const tBox = target.getBoundingClientRect()
-      const before = e.clientY < tBox.top + tBox.height / 2
-      if (before) container.insertBefore(dragging, target)
-      else container.insertBefore(dragging, target.nextElementSibling)
-    })
+      const rect = target.getBoundingClientRect()
+      const before = e.clientY < rect.top + rect.height / 2
+      const parent = target.parentElement || grid
+      parent.insertBefore(dragging, before ? target : target.nextElementSibling)
+    }
+    grid.addEventListener('dragover', onDragOver)
   }
 
   return (
@@ -203,7 +206,17 @@ export default function Organizer() {
       <div className="mt-6" id="pageContainer" ref={(el)=>{ if (el) enableDrag(el)}}>
         <PageGrid>
           {thumbs.map((src, i) => (
-            <div key={i} className="draggable relative" draggable data-page={i+1} onDragStart={(e)=> (e.currentTarget as any).classList.add('dragging')} onDragEnd={(e)=> (e.currentTarget as any).classList.remove('dragging')}>
+            <div
+              key={i}
+              className="draggable relative"
+              draggable
+              data-page={i+1}
+              onDragStart={(e)=> {
+                (e.currentTarget as any).classList.add('dragging')
+                try { e.dataTransfer?.setData('text/plain', String(i+1)); e.dataTransfer!.effectAllowed = 'move' } catch {}
+              }}
+              onDragEnd={(e)=> (e.currentTarget as any).classList.remove('dragging')}
+            >
               <PageThumbnail src={src} page={i+1} rotation={rotMap.get(i+1) || 0} onRotate={()=>{
                 setRotMap((m)=>{ const n = new Map(m); const cur = n.get(i+1)||0; n.set(i+1, (cur+90)%360); return n })
               }} onDelete={()=>{
