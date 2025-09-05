@@ -11,6 +11,7 @@ export default function Organizer() {
   const [files, setFiles] = useState<Uploaded[]>([])
   const [thumbs, setThumbs] = useState<string[]>([])
   const [dividers, setDividers] = useState<Set<number>>(new Set()) // split after page i
+  const [rotMap, setRotMap] = useState<Map<number, number>>(new Map())
   const [sourceForThumbs, setSourceForThumbs] = useState<File | null>(null)
   const [busy, setBusy] = useState(false)
   const [pwd, setPwd] = useState('')
@@ -73,6 +74,13 @@ export default function Organizer() {
       fd.append('file', sourceForThumbs)
       fd.append('order', order.join(','))
       fd.append('outfile', 'reordered.pdf')
+      // rotations CSV like 2:90,7:270 based on original page indices
+      const rotPairs: string[] = []
+      order.forEach((idx:number)=>{
+        const deg = rotMap.get(idx) || 0
+        if (deg % 360 !== 0) rotPairs.push(`${idx}:${(deg%360+360)%360}`)
+      })
+      if (rotPairs.length) fd.append('rotations', rotPairs.join(','))
       const j = await postForm('/organize/reorder', fd)
       push('Organized ✓', 'success')
       window.open(downloadUrl(j.outfile), '_blank')
@@ -151,16 +159,14 @@ export default function Organizer() {
       e.preventDefault()
       const dragging = container.querySelector('.dragging') as HTMLElement
       if (!dragging) return
-      const after = getAfter(container, e.clientY)
-      if (!after) container.appendChild(dragging); else container.insertBefore(dragging, after)
+      const el = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null
+      const target = el?.closest?.('.draggable') as HTMLElement | null
+      if (!target || target === dragging) return
+      const tBox = target.getBoundingClientRect()
+      const before = e.clientY < tBox.top + tBox.height / 2
+      if (before) container.insertBefore(dragging, target)
+      else container.insertBefore(dragging, target.nextElementSibling)
     })
-  }
-  function getAfter(container: HTMLElement, y: number) {
-    const nodes = [...container.querySelectorAll('.draggable:not(.dragging)')] as HTMLElement[]
-    return nodes.reduce((closest, child) => {
-      const box = child.getBoundingClientRect(); const offset = y - box.top - box.height/2
-      return (offset < 0 && offset > closest.offset) ? { offset, element: child } : closest
-    }, { offset: Number.NEGATIVE_INFINITY } as any).element
   }
 
   return (
@@ -198,7 +204,9 @@ export default function Organizer() {
         <PageGrid>
           {thumbs.map((src, i) => (
             <div key={i} className="draggable relative" draggable data-page={i+1} onDragStart={(e)=> (e.currentTarget as any).classList.add('dragging')} onDragEnd={(e)=> (e.currentTarget as any).classList.remove('dragging')}>
-              <PageThumbnail src={src} page={i+1} onDelete={()=>{
+              <PageThumbnail src={src} page={i+1} rotation={rotMap.get(i+1) || 0} onRotate={()=>{
+                setRotMap((m)=>{ const n = new Map(m); const cur = n.get(i+1)||0; n.set(i+1, (cur+90)%360); return n })
+              }} onDelete={()=>{
                 setThumbs((arr)=>arr.filter((_,idx)=>idx!==i))
               }} />
               {i < thumbs.length-1 && (

@@ -1,3 +1,5 @@
+from typing import Dict, Optional
+
 from pypdf import PdfReader, PdfWriter
 
 from app.config import TMP_DIR
@@ -76,7 +78,12 @@ def delete_pages(path, ranges, out_path):
         w.write(f)
 
 
-def reorder_pages(path: str, order: list[int], out_path: str):
+def reorder_pages(
+    path: str,
+    order: list[int],
+    out_path: str,
+    rotations: Optional[Dict[int, int]] = None,
+):
     r = PdfReader(path)
     maxp = len(r.pages)
     if not order:
@@ -84,7 +91,21 @@ def reorder_pages(path: str, order: list[int], out_path: str):
     if any(i < 1 or i > maxp for i in order):
         raise ValueError("Order contains out of bounds indices")
     w = PdfWriter()
+    rotations = rotations or {}
     for i in order:
-        w.add_page(r.pages[i - 1])
+        pg = r.pages[i - 1]
+        deg = int(rotations.get(i, 0)) % 360
+        if deg:
+            try:
+                pg = pg.rotate(deg)  # pypdf API: rotate multiples of 90
+            except Exception:
+                # Fallback for alternate API in older/newer versions
+                if deg % 90 == 0:
+                    for _ in range((deg // 90) % 4):
+                        try:
+                            pg.rotate_clockwise(90)  # type: ignore[attr-defined]
+                        except Exception:
+                            break
+        w.add_page(pg)
     with open(out_path, "wb") as f:
         w.write(f)
